@@ -3,11 +3,16 @@
 /**
  * Node.js CLI Calculator Application
  * 
- * Supported Operations:
+ * Supported Basic Operations:
  * - Addition (+)
  * - Subtraction (-)
  * - Multiplication (×)
  * - Division (÷)
+ * 
+ * Supported Advanced Operations:
+ * - Modulo (%)
+ * - Power/Exponentiation (^)
+ * - Square Root (√)
  */
 
 const Calculator = {
@@ -47,6 +52,41 @@ const Calculator = {
       throw new Error('Error: Division by zero is not allowed');
     }
     return a / b;
+  },
+
+  /**
+   * Modulo: Returns the remainder of a divided by b
+   * @param {number} a - Dividend
+   * @param {number} b - Divisor
+   * @returns {number} Remainder of a divided by b
+   * @throws {Error} If divisor is zero
+   */
+  modulo: (a, b) => {
+    if (b === 0) {
+      throw new Error('Error: Division by zero is not allowed for modulo operation');
+    }
+    return a % b;
+  },
+
+  /**
+   * Power: Raises base to the exponent
+   * @param {number} base - The base number
+   * @param {number} exponent - The exponent
+   * @returns {number} base raised to the power of exponent
+   */
+  power: (base, exponent) => Math.pow(base, exponent),
+
+  /**
+   * Square Root: Returns the square root of n
+   * @param {number} n - The number to get square root of
+   * @returns {number} Square root of n
+   * @throws {Error} If n is negative
+   */
+  squareRoot: (n) => {
+    if (n < 0) {
+      throw new Error('Error: Cannot calculate square root of a negative number');
+    }
+    return Math.sqrt(n);
   }
 };
 
@@ -60,25 +100,50 @@ function main() {
     console.log('Node.js CLI Calculator');
     console.log('');
     console.log('Usage: calculator.js <number1> <operation> <number2>');
+    console.log('       calculator.js <number> sqrt');
     console.log('');
     console.log('Supported Operations:');
     console.log('  add        - Addition (+)');
     console.log('  subtract   - Subtraction (-)');
     console.log('  multiply   - Multiplication (×)');
     console.log('  divide     - Division (÷)');
+    console.log('  modulo     - Modulo (%)');
+    console.log('  power      - Exponentiation (^)');
+    console.log('  sqrt       - Square Root (√)');
     console.log('');
     console.log('Examples:');
     console.log('  node calculator.js 10 add 5');
     console.log('  node calculator.js 20 subtract 8');
     console.log('  node calculator.js 4 multiply 7');
     console.log('  node calculator.js 100 divide 4');
+    console.log('  node calculator.js 17 modulo 5');
+    console.log('  node calculator.js 2 power 8');
+    console.log('  node calculator.js 16 sqrt');
     process.exit(0);
   }
 
   const num1 = parseFloat(args[0]);
   const operation = args[1].toLowerCase();
-  const num2 = parseFloat(args[2]);
+  const num2 = args[2] ? parseFloat(args[2]) : null;
 
+  // Special handling for square root (only needs one number)
+  if (operation === 'sqrt' || operation === '√') {
+    if (isNaN(num1)) {
+      console.error('Error: Operand must be a valid number');
+      process.exit(1);
+    }
+
+    try {
+      const result = Calculator.squareRoot(num1);
+      console.log(`√${num1} = ${result}`);
+    } catch (error) {
+      console.error(error.message);
+      process.exit(1);
+    }
+    return;
+  }
+
+  // For all other operations, require two numbers
   if (isNaN(num1) || isNaN(num2)) {
     console.error('Error: Both operands must be valid numbers');
     process.exit(1);
@@ -114,9 +179,21 @@ function main() {
         console.log(`${num1} ÷ ${num2} = ${result}`);
         break;
 
+      case 'modulo':
+      case '%':
+        result = Calculator.modulo(num1, num2);
+        console.log(`${num1} % ${num2} = ${result}`);
+        break;
+
+      case 'power':
+      case '^':
+        result = Calculator.power(num1, num2);
+        console.log(`${num1} ^ ${num2} = ${result}`);
+        break;
+
       default:
         console.error(`Error: Unknown operation '${operation}'`);
-        console.error('Valid operations: add, subtract, multiply, divide');
+        console.error('Valid operations: add, subtract, multiply, divide, modulo, power, sqrt');
         process.exit(1);
     }
   } catch (error) {
@@ -125,4 +202,8 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = Calculator;
